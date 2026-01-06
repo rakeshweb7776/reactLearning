@@ -6,6 +6,9 @@ function Counter() {
     const addEarning = () => {
         if (earning < 500) {
             setEarning(earning + 50)
+            setEarning(earning + 50)
+            setEarning(earning + 50)
+            setEarning(earning + 50)
         }
     }
 
