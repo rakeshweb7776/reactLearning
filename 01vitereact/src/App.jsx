@@ -1,6 +1,8 @@
-// import Card from "./components/card"
 import ColorChanger from "./components/ColorChanger"
-// import Counter from "./components/Counter"
+import Card from "./components/Card"
+import Counter from "./components/Counter"
+
+import PasswordGenerator from "./components/PasswordGenerator"
 
 function App() {
   // const userData = {
@@ -16,7 +18,8 @@ function App() {
     <div className="w-full h-full">
       {/* <Counter /> */}
       {/* <Card userData={userData}  /> */}
-      <ColorChanger />
+      {/* <ColorChanger /> */}
+      <PasswordGenerator />      
     </div>
 
   )
