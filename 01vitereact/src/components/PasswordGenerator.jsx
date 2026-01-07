@@ -1,42 +1,41 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 function PasswordGenerator() {
     const [password, setPassword] = useState("");
-    const [specialCharStatus, setSpecialCharStatus] = useState(false);
-    const [numbersStatus, setNumbersStatus] = useState(false);
-    const [passwordLength, setLength] = useState(16);
+    const [passwordLength, setPasswordLength] = useState(12);
+    const [numbersAllowed, setNumbersAllowed] = useState(false);
+    const [charAllowed, setCharAllowed] = useState(false);
     const [copied, setCopied] = useState(false);
 
-    const generatePassword = () => {
-        const special_characters = "!@#$%^&*()_+~`|}{[]:;?><,./-=";
-        const numbers = "0123456789";
-        const small_letters = "abcdefghijklmnopqrstuvwxyz";
-        const capital_letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const passwordRef = useRef(null);    
 
-        const allCharacters = 
-            (specialCharStatus ? special_characters : "") + 
-            small_letters + 
-            capital_letters + 
-            (numbersStatus ? numbers : "");
+    const passGenerator = useCallback(() => {
+        let pass = ""
+        let str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
-        let newPassword = "";
-        if (allCharacters.length > 0) {
-            for (let i = 0; i < passwordLength; i++) {
-                newPassword += allCharacters[Math.floor(Math.random() * allCharacters.length)];
+        if (charAllowed) str += "!@#$%^&*()_+"
+        if (numbersAllowed) str += "0123456789"
+
+        if (str.length > 0) {
+            for (let i = 1; i <= passwordLength; i++) {
+                let char = Math.floor(Math.random() * str.length + 1);
+                pass += str.charAt(char);
             }
         }
-        setPassword(newPassword);
-    }
+        setPassword(pass);
+    }, [passwordLength, charAllowed, numbersAllowed, setPassword]);
 
-    const copyToClipboard = () => {
+    const copyToClipboard = useCallback(() => {
+        passwordRef.current?.select();
+        passwordRef.current?.setSelectionRange(0, 25);
         navigator.clipboard.writeText(password);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
-    }
+    }, [password]);
 
     useEffect(() => {
-        generatePassword();
-    }, [passwordLength, specialCharStatus, numbersStatus]);
+        passGenerator()
+    }, [passwordLength, charAllowed, numbersAllowed, passGenerator]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col items-center justify-center p-4">
@@ -57,6 +56,7 @@ function PasswordGenerator() {
                             value={password}
                             readOnly
                             placeholder="Your password will appear here"
+                            ref={passwordRef}
                         />
                         <button
                             onClick={copyToClipboard}
@@ -85,14 +85,14 @@ function PasswordGenerator() {
                     <input
                         type="range"
                         min="8"
-                        max="32"
+                        max="25"
                         value={passwordLength}
-                        onChange={(e) => setLength(parseInt(e.target.value))}
+                        onChange={(e) => setPasswordLength(parseInt(e.target.value))}
                         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-indigo-500 hover:[&::-webkit-slider-thumb]:bg-indigo-600"
                     />
                     <div className="flex justify-between text-sm text-gray-500 mt-1">
                         <span>8</span>
-                        <span>32</span>
+                        <span>25</span>
                     </div>
                 </div>
 
@@ -101,19 +101,19 @@ function PasswordGenerator() {
                     <h2 className="text-lg font-semibold text-gray-800">
                         Include in password:
                     </h2>
-                    
+
                     <div className="space-y-4">
                         {/* Special Characters */}
                         <label className="flex items-center space-x-3 cursor-pointer group">
                             <div className="relative">
                                 <input
                                     type="checkbox"
-                                    checked={specialCharStatus}
-                                    onChange={() => setSpecialCharStatus(!specialCharStatus)}
+                                    checked={charAllowed}
+                                    onChange={() => setCharAllowed(!charAllowed)}
                                     className="sr-only"
                                 />
-                                <div className={`w-10 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${specialCharStatus ? 'bg-indigo-500' : 'bg-gray-300'}`}>
-                                    <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${specialCharStatus ? 'translate-x-4' : ''}`} />
+                                <div className={`w-10 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${charAllowed ? 'bg-indigo-500' : 'bg-gray-300'}`}>
+                                    <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${charAllowed ? 'translate-x-4' : ''}`} />
                                 </div>
                             </div>
                             <div className="flex-1">
@@ -129,12 +129,12 @@ function PasswordGenerator() {
                             <div className="relative">
                                 <input
                                     type="checkbox"
-                                    checked={numbersStatus}
-                                    onChange={() => setNumbersStatus(!numbersStatus)}
+                                    checked={numbersAllowed}
+                                    onChange={() => setNumbersAllowed(!numbersAllowed)}
                                     className="sr-only"
                                 />
-                                <div className={`w-10 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${numbersStatus ? 'bg-indigo-500' : 'bg-gray-300'}`}>
-                                    <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${numbersStatus ? 'translate-x-4' : ''}`} />
+                                <div className={`w-10 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${numbersAllowed ? 'bg-indigo-500' : 'bg-gray-300'}`}>
+                                    <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${numbersAllowed ? 'translate-x-4' : ''}`} />
                                 </div>
                             </div>
                             <div className="flex-1">
@@ -149,7 +149,7 @@ function PasswordGenerator() {
 
                 {/* Generate Button */}
                 <button
-                    onClick={generatePassword}
+                    onClick={passGenerator}
                     className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
                 >
                     🔄 Generate New Password
